@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>		       
+        <link rel="stylesheet" type="text/css" href= "js/jquery.mobile-1.0b3.min.css">
+        <meta name="viewport" content= "width=device-width; height=device-height; user-scalable=no">              
+	</head>
+	<body>
+		<div id="startPage" data-role="page" data-theme="a">
+			<div data-role="header">
+				<h1>Mobile OOO Assistant</h1>
+			</div>
+			<div data-role="content">
+				<p>Choose option</p>
+				<a data-role="button" data-transition="slide" href="#exchange">E-mail OOO</a>
+				<a data-role="button" data-transition="slide" href="#settings">Settings</a>
+			</div>
+		</div>
+		
+	<div data-role="page" id="exchange" data-theme="a" data-add-back-btn="true">
+    <div data-role="header">
+	  <h1>E-mail</h1>
+    </div>
+
+    <div data-role="content">
+		<label for="message">Message:</label>
+		<textarea name="messagee" id="message"></textarea>
+		<a href="#" id="sendEmailRequest" data-role="button">OK</a>	
+	</div>
+  </div>  
+  
+  <div data-role="page" id="settings" data-theme="a" data-add-back-btn="true">
+    <div data-role="header">
+      <h1>Settings</h1>
+    </div>
+
+    <div data-role="content">
+		<label for="phoneNr">Send to:</label>
+		<input type="tel" name="name" id="phoneNr" value=""  />
+		<a href="#" id="savePhoneNr" data-role="button">Save</a>
+	</div>
+  </div>  
+	
+	<script src="js/jquery-1.6.min.js" type= "text/javascript" />
+	<script src="js/jquery.mobile-1.0b3.min.js" type="text/javascript" />
+	<script src="phonegap.js" type="text/javascript" />
+	<script type="text/javascript">              
+	function onDeviceReady () {
+		
+		//var UID = device.uuid;
+		
+		var platform = device.platform;
+		
+		$('#sendEmailRequest').bind('click', function () {
+			
+			var phoneNr = null;
+			if (window.localStorage.getItem("phoneNr") && window.localStorage.getItem("phoneNr") != '') {
+				phoneNr = window.localStorage.getItem("phoneNr");
+			}
+			else if (platform != 'iPad'){
+				navigator.notification.alert('Please set phone number in Settings.');
+				$.mobile.changePage($("#settings"), { transition: "slide"});
+				return;
+			}
+			
+			var message = $('#message').val();
+
+			var data = "{ 'service': 'activateOutOfOffice', 'phone': '', 'message': '" + message + "' }";
+			
+			if (platform == 'Android') {
+				
+			}
+			else if (platform == 'iPhone') {
+				
+			}
+			else if (platform == 'iPad') { //iPad			
+				$.ajax({
+					  url: "http://ooa.roche.com:18000/ooaAction",
+					  type: "POST",
+					  contentType: "application/json; charset=utf-8",
+					  data: data,
+					  dataType: "json",
+					  success: function (res) {
+						 navigator.notification.alert('Request sent');
+					  },
+					  error: function (req, msg, obj) {
+						 navigator.notification.alert('Request Failed');
+					  }
+				}); 
+			}
+			else {
+				navigator.notification.alert('Your platform is not supported.');
+			}
+			
+		});    
+
+		
+		$('#savePhoneNr').bind('click', function () {
+			window.localStorage.setItem("phoneNr", $('#phoneNr').val());
+			$.mobile.changePage($("#startPage"), { transition: "slide"});
+		});
+		
+		//load phoneNr
+		if (window.localStorage.getItem("phoneNr")) {
+			$('#phoneNr').val(window.localStorage.getItem("phoneNr"));
+		}
+	}
+	document.addEventListener("deviceready", onDeviceReady, false);
+	</script> 
+	</body>
+</html>
